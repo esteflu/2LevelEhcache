@@ -3,6 +3,7 @@ package com.lundberg;
 import com.lundberg.config.AppConfig;
 import com.lundberg.domain.User;
 import com.lundberg.repositories.UserRepository;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,11 @@ public class JpaTest {
     @Autowired
     UserRepository userRepository;
 
+    @After
+    public void cleanDB() {
+        userRepository.deleteAll();
+    }
+
     @Test
     public void find_user_by_lastname() {
         //Given
@@ -34,6 +40,22 @@ public class JpaTest {
             assertEquals("Lundberg", user.getLastname());
         }
         assertEquals(2, users.size());
+    }
+
+    @Test
+    public void find_user_by_firstname() {
+        //Given
+        userRepository.save(createUser("Stefan", "Lundberg"));
+        userRepository.save(createUser("Theo", "Lundberg"));
+
+        //When
+        List<User> users = userRepository.findByFirstname("Stefan");
+
+        //Then
+        for (User user : users) {
+            assertEquals("Stefan", user.getFirstname());
+        }
+        assertEquals(1, users.size());
     }
 
     private User createUser(String firstname, String lastname) {

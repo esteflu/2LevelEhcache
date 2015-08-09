@@ -1,10 +1,14 @@
 package com.lundberg.domain;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class User {
 
     @Id

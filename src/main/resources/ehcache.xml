@@ -1,0 +1,13 @@
+<ehcache>
+    <diskStore path="java.io.tmpdir"/>
+    <cache name="com.lundberg.domain.User"
+        maxElementsInMemory="10000"
+    />
+    <defaultCache
+            maxElementsInMemory="10000"
+            >
+        <persistence strategy="localTempSwap"/>
+    </defaultCache>
+
+
+</ehcache>

@@ -3,6 +3,9 @@ package com.lundberg;
 import com.lundberg.config.AppConfig;
 import com.lundberg.domain.User;
 import com.lundberg.repositories.UserRepository;
+import com.lundberg.services.UserService;
+import com.sun.org.glassfish.external.statistics.Statistic;
+import net.sf.ehcache.CacheManager;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -10,6 +13,7 @@ import org.hibernate.Transaction;
 import org.hibernate.stat.Statistics;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.FactoryBean;
@@ -29,27 +33,30 @@ public class JpaTest {
     private UserRepository userRepository;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private FactoryBean<SessionFactory> sessionFactory;
 
     private int counter;
 
+    private Statistics statistics;
+
     @Before
-    public void populateDB() {
-        userRepository.save(createUser("Stefan", "Lundberg"));
-        userRepository.save(createUser("Kalle", "Karlsson"));
+    public void setup() throws Exception {
+        CacheManager.getInstance().clearAll();
+        statistics = getEnabledStatistics();
+        userService.saveUser(createUser("Stefan", "Lundberg"));
         counter = 0;
     }
 
     @After
-    public void cleanDB() {
+    public void teardown() {
         userRepository.deleteAll();
     }
 
     @Test
-    public void find_user_in_second_level_cache_twice() throws Exception {
-        Statistics statistics = getEnabledStatistics();
-        //Session session = sessionFactory.getObject().openSession();
-        //Transaction tx = session.beginTransaction();
+    public void find_user_by_lastname_in_second_level_cache_twice() throws Exception {
 
         findOneUserByLastName("Lundberg");
         printStatistics(statistics);
@@ -61,9 +68,19 @@ public class JpaTest {
         printStatistics(statistics);
 
         assertEquals(2, statistics.getSecondLevelCacheHitCount());
+    }
 
-        //tx.commit();
+    @Ignore
+    @Test
+    public void find_user_by_firstname_in_second_level_cache() throws Exception {
 
+        findOneUserByFirstName("Stefan");
+        printStatistics(statistics);
+
+        findOneUserByFirstName("Stefan");
+        printStatistics(statistics);
+
+        assertEquals(1, statistics.getSecondLevelCacheHitCount());
     }
 
     private User loadUserAndPrint(Statistics statistics, Session session, Long id) {
@@ -79,6 +96,10 @@ public class JpaTest {
 
     private User findOneUserByLastName(String lastname) {
         return userRepository.findByLastname(lastname).get(0);
+    }
+
+    private User findOneUserByFirstName(String firstname) {
+        return userRepository.findByFirstname(firstname).get(0);
     }
 
     private User createUser(String firstname, String lastname) {

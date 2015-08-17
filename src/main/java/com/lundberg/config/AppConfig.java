@@ -4,6 +4,7 @@ package com.lundberg.config;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -21,6 +22,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableJpaRepositories("com.lundberg.repositories")
+@ComponentScan("com.lundberg.services")
 public class AppConfig {
 
     @Bean
@@ -49,7 +51,7 @@ public class AppConfig {
                 setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
                 setProperty("hibernate.cache.use_second_level_cache", "true");
                 setProperty("hibernate.cache.use_query_cache", "true");
-                setProperty("net.sf.ehcache.configurationResourceName", ""); //TODO using default for now
+                setProperty("net.sf.ehcache.configurationResourceName", "ehcache.xml");
             }
         };
     }
